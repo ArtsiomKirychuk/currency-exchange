@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.external.nbrb.client import NBRBClient
 from app.core.jobs import update_rates_job
 from app.core.scheduler import start_scheduler, stop_scheduler
 from app.modules.exchange_rates.router import router as exchange_rates_router
