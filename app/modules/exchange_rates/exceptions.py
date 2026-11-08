@@ -1,0 +1,2 @@
+class ExchangeRateNotFoundError(Exception):
+    pass

@@ -2,14 +2,12 @@ import asyncio
 from enum import Enum
 from datetime import date
 from app.core.config import get_settings
+from app.core.database import get_session
 from app.modules.exchange_rates.models import ExchangeRateModel
 from .repository import ExchangeRateRepository
 from app.external.nbrb.client import NBRBClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
-
-
-from app.core.database import get_session
 
 
 class Periodicity(Enum):
@@ -40,7 +38,7 @@ class ExchangeRateService:
         await self.repository.update_rates(rates)
 
     async def get_exchange_rates(self) -> list[ExchangeRateModel]:
-        return await self.repository.get_all()
+        return await self.repository.get_latest_rates()
 
 
 def get_exchange_rate_service(session: AsyncSession = Depends(get_session)) -> ExchangeRateService:

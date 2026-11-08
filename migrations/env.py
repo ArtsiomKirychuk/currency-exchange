@@ -9,6 +9,7 @@ from alembic import context
 from app.core.config import get_settings
 from app.core.database import Base
 from app.modules.exchange_rates.models import ExchangeRateModel
+from app.modules.exchange_deals.models import ExchangeDealModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

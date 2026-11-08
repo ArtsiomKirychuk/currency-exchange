@@ -1,0 +1,62 @@
+<div class="deal-id">
+    <span>Deal ID</span>
+    <strong>#{{ deal.id }}</strong>
+</div>
+
+<div class="section-label">YOU SEND</div>
+
+<div class="amount">
+    {{ "%.2f"|format(deal.source_amount) }}
+    <span class="currency">{{ deal.source_currency }}</span>
+</div>
+
+<div class="exchange-rate">
+    <p>Exchange rate</p>
+    <strong>
+        1 {{ deal.source_currency }} =
+        {{ deal.cross_rate }}
+        {{ deal.target_currency }}
+    </strong>
+</div>
+
+<div class="section-label">YOU RECEIVE</div>
+
+<div class="amount">
+    {{ "%.2f"|format(deal.target_amount) }}
+    <span class="currency">{{ deal.target_currency }}</span>
+</div>
+
+<div class="deal-status">
+    {{ deal.status.value }}
+</div>
+
+{% if deal.status.value == "PENDING" %}
+    <p>Your deal is waiting for confirmation.</p>
+
+    <form action="/exchange-deals/{{ deal.id }}/confirm" method="post">
+        <button type="submit">Confirm deal</button>
+    </form>
+
+    <form action="/exchange-deals/{{ deal.id }}/reject" method="post">
+        <button type="submit">Reject deal</button>
+    </form>
+
+{% elif deal.status.value == "CONFIRMED" %}
+    <p class="success-message">
+        Your exchange deal has been confirmed successfully!
+    </p>
+
+{% elif deal.status.value == "REJECTED" %}
+    <p class="error-message">
+        You have rejected this exchange deal.
+    </p>
+
+{% elif deal.status.value == "EXPIRED" %}
+    <p class="error-message">
+        This exchange deal has expired.
+    </p>
+{% endif %}
+
+<div class="created-at">
+    {{ deal.created_at.strftime("%d.%m.%Y %H:%M") }}
+</div>

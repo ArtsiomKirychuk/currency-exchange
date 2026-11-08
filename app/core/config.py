@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     scheduler_hour: int = 0
     scheduler_minute: int = 5
 
+    expire_deal_in_minutes: int = 5
+    overdue_deals_expiration_minutes: int = 1
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

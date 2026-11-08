@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from app.core.jobs import update_rates_job
+from app.core.jobs import update_rates_job, expire_overdue_deals_job
 from app.core.config import get_settings
 
 
@@ -15,6 +15,16 @@ async def start_scheduler():
         hour=settings.scheduler_hour,
         minute=settings.scheduler_minute,
         id="update_exchange_rates",
+        replace_existing=True,
+        max_instances=1,
+        coalesce=True
+    )
+
+    scheduer.add_job(
+        func=expire_overdue_deals_job,
+        trigger="interval",
+        minutes=settings.overdue_deals_expiration_minutes,
+        id="expire_overdue_deals",
         replace_existing=True,
         max_instances=1,
         coalesce=True
