@@ -71,6 +71,7 @@ async def test_is_not_updated_today(session: AsyncSession):
 async def test_get_all(session: AsyncSession):
     repository = ExchangeRateRepository(session)
     session.execute(delete(ExchangeRateModel))
+    
     rates = [
         make_rate(431, date.today()),
         make_rate(451, date.today()),

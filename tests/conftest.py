@@ -1,11 +1,10 @@
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy import delete, text
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 
 
 from app.core.config import get_settings
-from app.modules.exchange_rates.models import ExchangeRateModel
 
 
 settings = get_settings()
