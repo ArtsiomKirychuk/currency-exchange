@@ -1,0 +1,755 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/exchange-rates/": {
+      "get": {
+        "tags": [
+          "Exchange Rates"
+        ],
+        "summary": "Get Exchange Rates",
+        "operationId": "get_exchange_rates_exchange_rates__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExchangeRate"
+                  },
+                  "type": "array",
+                  "title": "Response Get Exchange Rates Exchange Rates  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/": {
+      "post": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Create Deal",
+        "operationId": "create_deal_api_exchange_deals__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeDealCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/statistics": {
+      "get": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Get Statistics",
+        "operationId": "get_statistics_api_exchange_deals_statistics_get",
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Start date (inclusive).",
+              "example": "2026-11-01",
+              "title": "Date From"
+            },
+            "description": "Start date (inclusive)."
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "End date (inclusive).",
+              "example": "2026-11-05",
+              "title": "Date To"
+            },
+            "description": "End date (inclusive)."
+          },
+          {
+            "name": "currency_abbreviation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Currency abbreviation. If omitted, statistics are returned for all currencies.",
+              "example": "USD",
+              "title": "Currency Abbreviation"
+            },
+            "description": "Currency abbreviation. If omitted, statistics are returned for all currencies."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/expired": {
+      "get": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Get expired exchange deals",
+        "description": "Retursn all exchange deals with expired status",
+        "operationId": "get_expired_deals_api_exchange_deals_expired_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExchangeDealResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Expired Deals Api Exchange Deals Expired Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/pending": {
+      "get": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Get pending exchange deals",
+        "description": "Retursn all exchange deals with pending status",
+        "operationId": "get_pending_deals_api_exchange_deals_pending_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExchangeDealResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Pending Deals Api Exchange Deals Pending Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/{deal_id}": {
+      "get": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Get Deal",
+        "operationId": "get_deal_api_exchange_deals__deal_id__get",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/{deal_id}/confirm": {
+      "post": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Confirm Deal",
+        "operationId": "confirm_deal_api_exchange_deals__deal_id__confirm_post",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exchange-deals/{deal_id}/reject": {
+      "post": {
+        "tags": [
+          "Exchange deals API"
+        ],
+        "summary": "Reject Deal",
+        "operationId": "reject_deal_api_exchange_deals__deal_id__reject_post",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchange-deals/": {
+      "get": {
+        "tags": [
+          "Exchange Deals UI HTMLResponse"
+        ],
+        "summary": "Create Deal Page",
+        "operationId": "create_deal_page_exchange_deals__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Exchange Deals UI HTMLResponse"
+        ],
+        "summary": "Create Deal",
+        "operationId": "create_deal_exchange_deals__post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_deal_exchange_deals__post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeDealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchange-deals/{deal_id}": {
+      "get": {
+        "tags": [
+          "Exchange Deals UI HTMLResponse"
+        ],
+        "summary": "Get Deal",
+        "operationId": "get_deal_exchange_deals__deal_id__get",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchange-deals/{deal_id}/confirm": {
+      "post": {
+        "tags": [
+          "Exchange Deals UI HTMLResponse"
+        ],
+        "summary": "Confirm Deal",
+        "operationId": "confirm_deal_exchange_deals__deal_id__confirm_post",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchange-deals/{deal_id}/reject": {
+      "post": {
+        "tags": [
+          "Exchange Deals UI HTMLResponse"
+        ],
+        "summary": "Reject Deal",
+        "operationId": "reject_deal_exchange_deals__deal_id__reject_post",
+        "parameters": [
+          {
+            "name": "deal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Deal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_create_deal_exchange_deals__post": {
+        "properties": {
+          "source_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Source Amount"
+          },
+          "source_abbreviation": {
+            "type": "string",
+            "title": "Source Abbreviation"
+          },
+          "target_abbreviation": {
+            "type": "string",
+            "title": "Target Abbreviation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_amount",
+          "source_abbreviation",
+          "target_abbreviation"
+        ],
+        "title": "Body_create_deal_exchange_deals__post"
+      },
+      "ExchangeDealCreate": {
+        "properties": {
+          "source_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Source Amount"
+          },
+          "source_currency_abbreviation": {
+            "type": "string",
+            "title": "Source Currency Abbreviation"
+          },
+          "target_currency_abbreviation": {
+            "type": "string",
+            "title": "Target Currency Abbreviation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_amount",
+          "source_currency_abbreviation",
+          "target_currency_abbreviation"
+        ],
+        "title": "ExchangeDealCreate"
+      },
+      "ExchangeDealResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "source_amount": {
+            "type": "string",
+            "title": "Source Amount"
+          },
+          "source_currency": {
+            "type": "string",
+            "title": "Source Currency"
+          },
+          "target_amount": {
+            "type": "string",
+            "title": "Target Amount"
+          },
+          "target_currency": {
+            "type": "string",
+            "title": "Target Currency"
+          },
+          "cross_rate": {
+            "type": "string",
+            "title": "Cross Rate"
+          },
+          "source_rate_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Source Rate Date"
+          },
+          "target_rate_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Target Rate Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExchangeDealStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source_amount",
+          "source_currency",
+          "target_amount",
+          "target_currency",
+          "cross_rate",
+          "source_rate_date",
+          "target_rate_date",
+          "status",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "ExchangeDealResponse"
+      },
+      "ExchangeDealStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "CONFIRMED",
+          "REJECTED",
+          "EXPIRED"
+        ],
+        "title": "ExchangeDealStatus"
+      },
+      "ExchangeRate": {
+        "properties": {
+          "currency_id": {
+            "type": "integer",
+            "title": "Currency Id"
+          },
+          "currency_code": {
+            "type": "integer",
+            "title": "Currency Code"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "currency_abbreviation": {
+            "type": "string",
+            "title": "Currency Abbreviation"
+          },
+          "currency_scale": {
+            "type": "integer",
+            "title": "Currency Scale"
+          },
+          "currency_name": {
+            "type": "string",
+            "title": "Currency Name"
+          },
+          "currency_official_rate": {
+            "type": "string",
+            "title": "Currency Official Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "currency_id",
+          "currency_code",
+          "date",
+          "currency_abbreviation",
+          "currency_scale",
+          "currency_name",
+          "currency_official_rate"
+        ],
+        "title": "ExchangeRate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

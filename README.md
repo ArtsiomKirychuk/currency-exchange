@@ -103,3 +103,13 @@ To remove the test containers and volumes after execution:
 ```bash
 docker compose -f docker-compose.test.yml down -v
 ```
+
+## API Documentation
+
+The application provides interactive API documentation powered by Swagger UI.
+
+After starting the application, you can access:
+
+- **Swagger UI:** http://localhost:8000/docs
+- **OpenAPI JSON schema:** http://localhost:8000/openapi.json
+- **API specification example:** [swagger.json](./swagger.json) — an example of the API specification located in the root directory of the project.
