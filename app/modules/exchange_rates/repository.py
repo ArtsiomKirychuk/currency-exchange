@@ -51,14 +51,19 @@ class ExchangeRateRepository:
         query = insert(ExchangeRateModel).values(rates) \
             .on_conflict_do_nothing(index_elements=["currency_id", "date"])
         await self.session.execute(query)
-        await self.session.commit()
 
-    async def get_latest_rate(self, currency_id: int) -> ExchangeRateModel | None:
-        query = select(ExchangeRateModel) \
-            .where(ExchangeRateModel.currency_id==currency_id) \
-            .order_by(ExchangeRateModel.date.desc())\
-            .limit(1)
-        
+    async def get_latest_rate(
+        self, 
+        currency_id: int | None = None, 
+        currency_abbreviation: str | None = None
+    ) -> ExchangeRateModel | None:
+        query = select(ExchangeRateModel)
+        if currency_id:
+            query = query.where(ExchangeRateModel.currency_id==currency_id)
+        if currency_abbreviation:
+            query = query.where(ExchangeRateModel.currency_abbreviation==currency_abbreviation)
+
+        query = query.order_by(ExchangeRateModel.date.desc()).limit(1)   
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 

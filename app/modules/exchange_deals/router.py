@@ -1,45 +1,41 @@
+import logging
+from http import HTTPStatus
 from pathlib import Path
-from fastapi import APIRouter, Depends, Request, HTTPException, status, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Annotated
 
+from app.logs.decorators import log_operation
+from app.logs.models import LogOperation
+from app.modules.exchange_deals.exceptions import InvalidDealStatusError
+from app.modules.exchange_rates.exceptions import ExchangeRateNotFoundError
 from app.modules.exchange_deals.schemas import ExchangeDealResponse, ExchangeDealCreate, ExchangeDealStatisticsRequest
 from app.modules.exchange_deals.service import ExchangeDealService, get_exchange_deal_service
 
 
+logger = logging.getLogger(__name__)
+
+
 router = APIRouter(
-    prefix="/exchange-deals",
-    tags=["Exchange Deals"]
+    prefix="/api/exchange-deals",
+    tags=["Exchange deals API"]
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
-
-@router.get("/", response_class=HTMLResponse)
-async def create_deal_page(
-    request: Request, 
-    service: ExchangeDealService = Depends(get_exchange_deal_service)
-):
-    currencies = await service.get_available_currencies()
-    return templates.TemplateResponse(
-        request=request,
-        name="create_deal.html",
-        context={"currencies": currencies}
-    )
 
 @router.post("/", response_model=ExchangeDealResponse)
+@log_operation(LogOperation.CREATE_DEAL)
 async def create_deal(
-    data: ExchangeDealCreate = Depends(ExchangeDealCreate.as_form),
+    data: ExchangeDealCreate,
     service: ExchangeDealService = Depends(get_exchange_deal_service)
 ):
-    deal = await service.create_deal(data)
+    try:
+        return await service.create_deal(data)
+    except ExchangeRateNotFoundError as exc:
+        logger.warning(exc.message)
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=exc.message
+        )
 
-    return RedirectResponse(
-        url=f"/exchange-deals/{deal.id}",
-        status_code=303,
-    )
 
 @router.get("/statistics")
 async def get_statistics(
@@ -52,6 +48,7 @@ async def get_statistics(
         currency_abbreviation=request.currency_abbreviation
     )
 
+
 @router.get(
     "/expired",
     response_model=list[ExchangeDealResponse],
@@ -63,47 +60,57 @@ async def get_expired_deals(
 ):
     return await service.get_expired_deals()
 
-@router.get("/{deal_id}", response_class=HTMLResponse)
+
+@router.get(
+    "/pending",
+    response_model=list[ExchangeDealResponse],
+    summary="Get pending exchange deals",
+    description="Retursn all exchange deals with pending status"
+)
+async def get_pending_deals(
+    service: ExchangeDealService = Depends(get_exchange_deal_service)
+):
+    return await service.get_pending_deals()
+
+
+@router.get("/{deal_id}", response_model=ExchangeDealResponse)
 async def get_deal(
-    request: Request,
     deal_id: int, 
     service: ExchangeDealService = Depends(get_exchange_deal_service)
 ):
     deal = await service.get_deal(deal_id)
-
     if not deal:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deal not found")
+    return deal
 
-    return templates.TemplateResponse(
-        request=request,
-        name="deal.html",
-        context={"deal": deal}
-    )
 
-@router.post("/{deal_id}/confirm", response_class=HTMLResponse)
+@router.post("/{deal_id}/confirm", response_model=ExchangeDealResponse)
+@log_operation(LogOperation.CONFIRM_DEAL)
 async def confirm_deal(
-    request: Request,
     deal_id: int, 
     service: ExchangeDealService = Depends(get_exchange_deal_service)
 ):
+    try:
+        return await service.confirm_deal(deal_id)
+    except InvalidDealStatusError as exc:
+        logger.warning(exc.message)
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=exc.message
+        )
 
-    deal = await service.confirm_deal(deal_id)
 
-    return templates.TemplateResponse(
-        request=request,
-        name="deal.html",
-        context={"deal": deal}
-    )
-
-@router.post("/{deal_id}/reject", response_class=HTMLResponse)
+@router.post("/{deal_id}/reject", response_model=ExchangeDealResponse)
+@log_operation(LogOperation.REJECT_DEAL)
 async def reject_deal(
-    request: Request,
     deal_id: int,
     service: ExchangeDealService = Depends(get_exchange_deal_service)
 ):
-    deal = await service.reject_deal(deal_id)
-    return templates.TemplateResponse(
-        request=request,
-        name="deal.html",
-        context={"deal": deal}
-    )
+    try:
+        return await service.reject_deal(deal_id)
+    except InvalidDealStatusError as exc:
+        logger.warning(exc.message)
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=exc.message
+        )

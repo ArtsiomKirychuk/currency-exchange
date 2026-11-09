@@ -17,9 +17,10 @@ class Periodicity(Enum):
 
 class ExchangeRateService:
 
-    def __init__(self, repository: ExchangeRateRepository, nbrb_client: NBRBClient):
+    def __init__(self, repository: ExchangeRateRepository, nbrb_client: NBRBClient, session: AsyncSession):
         self.repository = repository
         self.nbrb_client = nbrb_client
+        self.session = session
 
     async def update_rates(self):
         is_updated_today = await self.repository.is_updated_today()
@@ -36,6 +37,7 @@ class ExchangeRateService:
             return
         
         await self.repository.update_rates(rates)
+        await self.session.commit()
 
     async def get_exchange_rates(self) -> list[ExchangeRateModel]:
         return await self.repository.get_latest_rates()
@@ -45,4 +47,4 @@ def get_exchange_rate_service(session: AsyncSession = Depends(get_session)) -> E
     settings = get_settings()
     repository = ExchangeRateRepository(session)
     nbrb_client = NBRBClient(base_url=settings.nbrb_base_url)
-    return ExchangeRateService(repository=repository, nbrb_client=nbrb_client)
+    return ExchangeRateService(repository=repository, nbrb_client=nbrb_client, session=session)

@@ -1,62 +1,301 @@
-<div class="deal-id">
-    <span>Deal ID</span>
-    <strong>#{{ deal.id }}</strong>
-</div>
 
-<div class="section-label">YOU SEND</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Deal #{{ deal.id }}</title>
 
-<div class="amount">
-    {{ "%.2f"|format(deal.source_amount) }}
-    <span class="currency">{{ deal.source_currency }}</span>
-</div>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<div class="exchange-rate">
-    <p>Exchange rate</p>
-    <strong>
-        1 {{ deal.source_currency }} =
-        {{ deal.cross_rate }}
-        {{ deal.target_currency }}
-    </strong>
-</div>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f3f5f9;
+            font-family: Arial, sans-serif;
+            color: #263247;
+        }
 
-<div class="section-label">YOU RECEIVE</div>
+        .deal-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+        }
 
-<div class="amount">
-    {{ "%.2f"|format(deal.target_amount) }}
-    <span class="currency">{{ deal.target_currency }}</span>
-</div>
+        .deal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
 
-<div class="deal-status">
-    {{ deal.status.value }}
-</div>
+        .deal-id {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
-{% if deal.status.value == "PENDING" %}
-    <p>Your deal is waiting for confirmation.</p>
+        .deal-id span {
+            color: #8993a4;
+            font-size: 13px;
+        }
 
-    <form action="/exchange-deals/{{ deal.id }}/confirm" method="post">
-        <button type="submit">Confirm deal</button>
-    </form>
+        .deal-id strong {
+            font-size: 20px;
+        }
 
-    <form action="/exchange-deals/{{ deal.id }}/reject" method="post">
-        <button type="submit">Reject deal</button>
-    </form>
+        .deal-status {
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #fff4d6;
+            color: #a87500;
+        }
 
-{% elif deal.status.value == "CONFIRMED" %}
-    <p class="success-message">
-        Your exchange deal has been confirmed successfully!
-    </p>
+        .status-confirmed {
+            background: #e3f7eb;
+            color: #21834b;
+        }
 
-{% elif deal.status.value == "REJECTED" %}
-    <p class="error-message">
-        You have rejected this exchange deal.
-    </p>
+        .status-rejected,
+        .status-expired {
+            background: #fde8e8;
+            color: #c33b3b;
+        }
 
-{% elif deal.status.value == "EXPIRED" %}
-    <p class="error-message">
-        This exchange deal has expired.
-    </p>
-{% endif %}
+        .section-label {
+            margin-bottom: 10px;
+            color: #8993a4;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
 
-<div class="created-at">
-    {{ deal.created_at.strftime("%d.%m.%Y %H:%M") }}
-</div>
+        .amount {
+            margin-bottom: 24px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .currency {
+            color: #4778e8;
+            font-size: 18px;
+        }
+
+        .exchange-rate {
+            margin: 24px 0;
+            padding: 16px;
+            border-radius: 10px;
+            background: #f3f5f9;
+            text-align: center;
+        }
+
+        .exchange-rate p {
+            margin: 0 0 8px;
+            color: #8993a4;
+            font-size: 13px;
+        }
+
+        .exchange-rate strong {
+            font-size: 14px;
+        }
+
+        .message {
+            margin: 24px 0;
+            padding: 14px;
+            border-radius: 9px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .pending-message {
+            background: #fff8e6;
+            color: #946b12;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f7ed;
+            color: #21834b;
+        }
+
+        .error-message {
+            background: #fdecec;
+            color: #c33b3b;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .actions form {
+            flex: 1;
+            max-width: 160px;
+            margin: 0;
+        }
+
+        .actions button {
+            width: 100%;
+            height: 44px;
+            margin: 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .next-deal-button {
+            display: block;
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 9px;
+            background: #4778e8;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .next-deal-button:hover {
+            background: #3565d0;
+        }
+
+        .confirm-button {
+            background: #278c53;
+        }
+
+        .reject-button {
+            background: #d94b4b;
+        }
+
+        .created-at {
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #edf0f4;
+            color: #8993a4;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="deal-card">
+
+        <div class="deal-header">
+            <div class="deal-id">
+                <span>Deal ID</span>
+                <strong>#{{ deal.id }}</strong>
+            </div>
+
+            <div class="deal-status
+                {% if deal.status.value == 'CONFIRMED' %}status-confirmed
+                {% elif deal.status.value in ['REJECTED', 'EXPIRED'] %}status-rejected
+                {% endif %}">
+                {{ deal.status.value }}
+            </div>
+        </div>
+
+        <div class="section-label">YOU SEND</div>
+
+        <div class="amount">
+            {{ "%.2f"|format(deal.source_amount) }}
+            <span class="currency">{{ deal.source_currency }}</span>
+        </div>
+
+        <div class="exchange-rate">
+            <p>Exchange rate</p>
+            <strong>
+                1 {{ deal.source_currency }} =
+                {{ deal.cross_rate }}
+                {{ deal.target_currency }}
+            </strong>
+        </div>
+
+        <div class="section-label">YOU RECEIVE</div>
+
+        <div class="amount">
+            {{ "%.2f"|format(deal.target_amount) }}
+            <span class="currency">{{ deal.target_currency }}</span>
+        </div>
+
+        {% if deal.status.value == "PENDING" %}
+
+            <div class="message pending-message">
+                Your deal is waiting for confirmation.
+            </div>
+
+            <div class="actions">
+                <form action="/exchange-deals/{{ deal.id }}/confirm" method="post" style="flex: 1;">
+                    <button type="submit" class="confirm-button">
+                        Confirm
+                    </button>
+                </form>
+
+                <form action="/exchange-deals/{{ deal.id }}/reject" method="post" style="flex: 1;">
+                    <button type="submit" class="reject-button">
+                        Reject
+                    </button>
+                </form>
+            </div>
+
+        {% elif deal.status.value == "CONFIRMED" %}
+
+            <div class="message success-message">
+                Your exchange deal has been confirmed successfully!
+            </div>
+            <a href="/exchange-deals/" class="next-deal-button">
+                Create another deal →
+            </a>
+
+        {% elif deal.status.value == "REJECTED" %}
+
+            <div class="message error-message">
+                You have rejected this exchange deal.
+            </div>
+
+        {% elif deal.status.value == "EXPIRED" %}
+
+            <div class="message error-message">
+                This exchange deal has expired.
+            </div>
+
+        {% endif %}
+
+        <div class="created-at">
+            Created at {{ deal.created_at.strftime("%d.%m.%Y %H:%M") }}
+        </div>
+
+    </div>
+</body>
+</html>

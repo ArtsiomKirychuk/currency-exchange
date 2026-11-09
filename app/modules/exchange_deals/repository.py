@@ -69,3 +69,11 @@ class ExchangeDealRepository:
 
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def get_pending_deals(self) -> list[ExchangeDealModel]:
+        query = select(ExchangeDealModel) \
+            .where(ExchangeDealModel.status==ExchangeDealStatus.PENDING) \
+            .order_by(ExchangeDealModel.created_at.desc())
+
+        result = await self.session.execute(query)
+        return result.scalars().all()

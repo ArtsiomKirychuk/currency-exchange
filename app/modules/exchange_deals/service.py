@@ -34,11 +34,13 @@ class ExchangeDealService:
 
     async def create_deal(self, exchange_deal: ExchangeDealCreate) -> ExchangeDealModel:
         async with self.session.begin():
-            source_rate = await self.rate_repository.get_latest_rate(exchange_deal.source_currency_id)
-            target_rate = await self.rate_repository.get_latest_rate(exchange_deal.target_currency_id)
+            source_rate = await self.rate_repository.get_latest_rate(currency_abbreviation=exchange_deal.source_currency_abbreviation)
+            target_rate = await self.rate_repository.get_latest_rate(currency_abbreviation=exchange_deal.target_currency_abbreviation)
 
-            if not source_rate or not target_rate:
-                raise ExchangeRateNotFoundError()
+            if not source_rate:
+                raise ExchangeRateNotFoundError(exchange_deal.source_currency_abbreviation)
+            if not target_rate:
+                raise ExchangeRateNotFoundError(exchange_deal.target_currency_abbreviation)
             
             normalized_source_rate = source_rate.currency_official_rate / source_rate.currency_scale
             normalized_target_rate = target_rate.currency_official_rate / target_rate.currency_scale
@@ -120,6 +122,9 @@ class ExchangeDealService:
 
     async def get_expired_deals(self) -> list[ExchangeDealModel]:
         return await self.deal_repository.get_expired_deals()
+
+    async def get_pending_deals(self) -> list[ExchangeDealModel]:
+        return await self.deal_repository.get_pending_deals()
         
 
 def get_exchange_deal_service(session: AsyncSession = Depends(get_session)):

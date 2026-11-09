@@ -8,20 +8,20 @@ from app.modules.exchange_deals.models import ExchangeDealStatus
 
 class ExchangeDealCreate(BaseModel):
     source_amount: Decimal = Field(gt=0)
-    source_currency_id: int
-    target_currency_id: int
+    source_currency_abbreviation: str
+    target_currency_abbreviation: str
 
     @classmethod
     def as_form(
         cls,
         source_amount: Decimal = Form(),
-        source_currency_id: int = Form(),
-        target_currency_id: int = Form(),
+        source_abbreviation: str = Form(),
+        target_abbreviation: str = Form(),
     ):
         return cls(
             source_amount=source_amount,
-            source_currency_id=source_currency_id,
-            target_currency_id=target_currency_id,
+            source_currency_abbreviation=source_abbreviation,
+            target_currency_abbreviation=target_abbreviation,
         )
 
 class ExchangeDealResponse(BaseModel):

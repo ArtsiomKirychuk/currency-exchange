@@ -1,39 +1,175 @@
-<form action="/exchange-deals/" method="POST">
 
-    <div>
-        <label for="source_amount">Amount:</label>
-        <input
-            type="number"
-            id="source_amount"
-            name="source_amount"
-            step="0.01"
-            min="0.01"
-            required
-        >
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Exchange</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f5f9;
+            font-family: Arial, sans-serif;
+            color: #263247;
+        }
+
+        .exchange-card {
+            width: 100%;
+            max-width: 430px;
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+            text-align: center;
+        }
+
+        .subtitle {
+            margin: 0 0 28px;
+            color: #8993a4;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #dce1e9;
+            border-radius: 9px;
+            background: #fff;
+            color: #263247;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: #4778e8;
+        }
+
+        .exchange-direction {
+            margin: 4px 0 20px;
+            text-align: center;
+            color: #4778e8;
+            font-size: 22px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 9px;
+            background: #4778e8;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #3565d0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="exchange-card">
+        <h1>Currency Exchange</h1>
+        <p class="subtitle">Create a new exchange deal</p>
+
+        <form action="/exchange-deals/" method="POST">
+
+            <div class="form-group">
+                <label for="source_amount">Amount</label>
+                <input
+                    type="number"
+                    id="source_amount"
+                    name="source_amount"
+                    placeholder="Enter amount"
+                    step="0.01"
+                    min="0.01"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="source_abbreviation">From</label>
+                <select id="source_abbreviation" name="source_abbreviation" required>
+                    {% for currency in currencies %}
+                        <option value="{{ currency.currency_abbreviation }}">
+                            {{ currency.currency_abbreviation }} - {{ currency.currency_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="exchange-direction">↓</div>
+
+            <div class="form-group">
+                <label for="target_abbreviation">To</label>
+                <select id="target_abbreviation" name="target_abbreviation" required>
+                    {% for currency in currencies %}
+                        <option value="{{ currency.currency_abbreviation }}">
+                            {{ currency.currency_abbreviation }} - {{ currency.currency_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Create exchange deal</button>
+
+        </form>
     </div>
+    <script>
+        const sourceSelect = document.getElementById("source_abbreviation");
+        const targetSelect = document.getElementById("target_abbreviation");
 
-    <div>
-        <label for="source_currency_id">From:</label>
-        <select id="source_currency_id" name="source_currency_id" required>
-            {% for currency in currencies %}
-                <option value="{{ currency.currency_id }}">
-                    {{ currency.currency_abbreviation }} - {{ currency.currency_name }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
+        function updateCurrencies() {
+            if (sourceSelect.value === targetSelect.value) {
+                targetSelect.selectedIndex = 1;
+            }
+            const sourceValue = sourceSelect.value;
+            const targetValue = targetSelect.value;
 
-    <div>
-        <label for="target_currency_id">To:</label>
-        <select id="target_currency_id" name="target_currency_id" required>
-            {% for currency in currencies %}
-                <option value="{{ currency.currency_id }}">
-                    {{ currency.currency_abbreviation }} - {{ currency.currency_name }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
+            Array.from(targetSelect.options).forEach(option => {
+                option.disabled = option.value === sourceValue;
+            });
 
-    <button type="submit">Create deal</button>
+            Array.from(sourceSelect.options).forEach(option => {
+                option.disabled = option.value === targetValue;
+            });
+        }
 
-</form>
+        sourceSelect.addEventListener("change", updateCurrencies);
+        targetSelect.addEventListener("change", updateCurrencies);
+
+        updateCurrencies();
+    </script>
+</body>
+</html>
